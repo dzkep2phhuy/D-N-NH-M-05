@@ -1,0 +1,29 @@
+# Hướng Dẫn Chơi Game Kéo – Búa – Bao
+
+## 1. Cách chạy máy chủ (server)
+- Mở Terminal, chạy:
+  ```bash
+  python server.py
+  ```
+
+## 2. Cách chạy máy khách (client)
+- Mở file `client.py`, chỉnh dòng IP:
+  ```python
+  HOST = "IP_của_máy_chủ"
+  ```
+- Sau đó chạy:
+  ```bash
+  python client.py
+  ```
+
+## 3. Cách chơi
+- Nhập tên khi được yêu cầu.
+- Đợi ghép trận.
+- Nhập lựa chọn: `kéo`, `búa`, hoặc `bao`.
+- Nhận kết quả: Thắng – Thua – Hòa.
+- Chơi tiếp vòng sau.
+
+## 4. Ghi nhớ
+- Phải có 2 người chơi.
+- Gõ đúng chính tả lựa chọn.
+- Máy khách và máy chủ cần cùng mạng LAN.

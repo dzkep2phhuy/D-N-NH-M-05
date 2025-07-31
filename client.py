@@ -14,5 +14,5 @@ while True:
     msg = s.recv(1024).decode()
     print(msg)
     if "Enter your move" in msg:
-        move = input("Lựa chọn (rock/paper/scissors): ")
+        move = input("Lựa chọn (kéo/búa/bao): ")
         s.sendall(move.encode())
