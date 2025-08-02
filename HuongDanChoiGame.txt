@@ -4,7 +4,7 @@
 - Mở Terminal, chạy:
   ```bash
   python server.py
-  ```
+  ``` 
 
 ## 2. Cách chạy máy khách (client)
 - Mở file `client.py`, chỉnh dòng IP:
