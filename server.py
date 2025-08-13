@@ -7,7 +7,6 @@ PORT = 9999
 
 match_queue = queue.Queue()
 
-
 def determine_winner(p1, p2):
     if p1 == p2:
         return "hòa"
