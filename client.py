@@ -8,11 +8,12 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 
 name = input("Nhập tên của bạn: ")
-s.sendall(name.encode())
+s.sendall(name.encode("utf-8"))
 
 while True:
-    msg = s.recv(1024).decode()
+    msg = s.recv(1024).decode("utf-8", errors="ignore")
     print(msg)
-    if "Enter your move" in msg:
+    # chỉ sửa điều kiện dưới đây để nhận cả tiếng Việt lẫn tiếng Anh
+    if ("Enter your move" in msg) or ("Nhập lựa chọn" in msg) or ("(kéo/búa/bao)" in msg):
         move = input("Lựa chọn (kéo/búa/bao): ")
-        s.sendall(move.encode())
+        s.sendall(move.encode("utf-8"))
