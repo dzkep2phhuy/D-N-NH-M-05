@@ -1,0 +1,79 @@
+LÝ THUYẾT & NGUỒN KIẾN THỨC – ỨNG DỤNG CHAT TCP (client.py / server.py)
+================================================================================
+
+1) MÔ HÌNH & KIẾN TRÚC
+- Mô hình Client–Server: server lắng nghe một cổng TCP cố định, mỗi client kết nối
+  tạo ra một luồng (thread) xử lý riêng.
+- Broadcast: server chuyển tiếp tin nhắn từ một client đến tất cả client khác.
+- PM (private message): server tra cứu đích theo ánh xạ tên → socket.
+
+2) GIAO THỨC ỨNG DỤNG (APPLICATION PROTOCOL)
+- Kiểu "line-based": mỗi thông điệp kết thúc bằng '\n' (newline-delimited).
+- Lệnh bắt đầu bằng ký tự '/' (ví dụ '/nick', '/pm', '/list', '/quit').
+- Ưu điểm: đơn giản, dễ debug bằng telnet/netcat; nhược: không đóng gói nhị phân
+  và chưa có checksum riêng (dựa vào TCP).
+
+3) TCP & XỬ LÝ BUFFER
+- TCP là stream byte tin cậy, có thể fragment hoặc coalesce gói; vì vậy phải tự
+  ghép buffer và tách theo dấu kết thúc ('\n') để lấy đúng ranh giới thông điệp.
+- Trên server/client: đọc recv(4096) → nối vào buffer → tách từng dòng hoàn chỉnh.
+
+4) ĐA LUỒNG & VÙNG GHI CHUNG
+- Mỗi client có một thread 'handle_client'; truy cập cấu trúc dùng chung (map
+  socket_to_name, name_to_socket) được bảo vệ bởi Lock để tránh race condition.
+- Khi gửi broadcast, gom các kết nối lỗi để dọn (cleanup) sau vòng lặp gửi.
+
+5) QUY ƯỚC ĐẶT TÊN & QUẢN LÝ PHIÊN
+- Tên người dùng là duy nhất (name_to_socket), không rỗng, không chứa khoảng trắng.
+- Khi đổi tên thành công: broadcast thông báo đổi tên.
+- Khi client rời: cleanup xóa cả hai ánh xạ và broadcast đã thoát.
+
+6) MÃ HÓA & HỖ TRỢ TIẾNG VIỆT
+- Dùng UTF-8 cho encode/decode chuỗi; khi in ra console nên dùng font hỗ trợ Unicode.
+- Nếu chạy trên Windows cũ, có thể cần 'chcp 65001' để bật UTF-8 cho terminal.
+
+7) LỆNH HỖ TRỢ
+- /help  : gửi lại nội dung hướng dẫn (WELCOME).
+- /nick  : đặt tên mới (validate + cập nhật map).
+- /list  : trả về danh sách người dùng đang online.
+- /pm    : gửi riêng đến một người dùng đích; server cũng trả ACK cho người gửi.
+- /quit  : server gửi "Tạm biệt!" rồi đóng phiên cho client.
+
+8) XỬ LÝ LỖI & DỌN DẸP
+- Bắt ConnectionResetError/AbortedError/OSError để tránh sập thread.
+- Dọn dẹp (cleanup) luôn đóng socket và đối xứng map; broadcast người dùng rời.
+- Client có 'finally' đóng socket; thread nhận là daemon nên kết thúc khi chương trình thoát.
+
+9) HẠN CHẾ HIỆN TẠI
+- Chưa có bảo mật đường truyền (TLS), chưa xác thực người dùng.
+- Không giới hạn tốc độ gửi; có thể bị spam/flood.
+- Chưa có phòng/bênh/nhóm chat (channel/room) tách biệt.
+- Chưa có lưu lịch sử tin nhắn lâu dài (chỉ hiển thị live).
+
+10) HƯỚNG PHÁT TRIỂN
+- Thêm TLS/SSL, cơ chế login (token/JWT), quản lý người dùng.
+- Thêm kênh/room, quyền admin, chặn/khóa tạm thời.
+- Viết client giao diện (Tkinter/PyQt) hoặc chuyển sang WebSocket để làm web app.
+- Tối ưu hiệu năng: event-driven (asyncio) thay cho thread-per-connection.
+
+11) KẾT QUẢ MONG ĐỢI KHI HỌC/THỰC HÀNH
+- Hiểu socket TCP cơ bản (bind, listen, accept, connect, send, recv).
+- Nắm cách đóng gói giao thức ứng dụng dạng dòng (line-based framing).
+- Quen xử lý đa luồng, khóa tài nguyên chung, và xử lý lỗi mạng.
+- Biết cách thiết kế lệnh (command) đơn giản trên ứng dụng chat.
+
+12) TỪ KHÓA TRA CỨU THÊM
+- "Python socket programming", "TCP stream framing newline", "threading.Lock",
+  "broadcast chat server", "private message socket".
+
+13) THAM KHẢO / NGUỒN KIẾN THỨC
+- Python Docs – socket: https://docs.python.org/3/library/socket.html
+- Python Docs – threading: https://docs.python.org/3/library/threading.html
+- Beej's Guide to Network Programming (C/UNIX, nền tảng TCP/UDP): https://beej.us/guide/bgnet/
+- RFC 793 (Transmission Control Protocol – TCP), RFC 768 (UDP)
+- TCP/IP Illustrated, Vol. 1 – W. Richard Stevens
+- Unix Network Programming – W. Richard Stevens
+- (Gợi ý) Asyncio cho mô hình event-driven: https://docs.python.org/3/library/asyncio.html
+
+================================================================================
+(Tài liệu lý thuyết – Nhóm thực hiện đề tài Lập trình Mạng)

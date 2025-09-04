@@ -1,0 +1,98 @@
+HƯỚNG DẪN SỬ DỤNG ỨNG DỤNG CHAT TCP (client.py / server.py)
+================================================================================
+
+1) MÔ TẢ NGẮN
+- Ứng dụng chat dạng console, mô hình Client–Server sử dụng TCP.
+- Server nhận kết nối nhiều client (mỗi client một thread xử lý).
+- Giao thức dòng: mỗi thông điệp kết thúc bằng ký tự xuống dòng '\n'.
+- Mã hóa văn bản: UTF-8.
+
+2) YÊU CẦU MÔI TRƯỜNG
+- Python 3.9+ (đã cài vào PATH).
+- Hệ điều hành: Windows / Linux / macOS.
+- Mạng LAN hoặc cùng máy (localhost) để thử nhanh.
+- Nếu chạy khác máy trong LAN: mở port trên firewall của server.
+
+3) CẤU TRÚC FILE
+- server.py  : Chạy server, lắng nghe kết nối TCP, broadcast tin nhắn.
+- client.py  : Kết nối server, đọc/nhập tin nhắn, hỗ trợ lệnh /nick, /pm...
+
+4) CHẠY NHANH TRÊN CÙNG MÁY (LOCALHOST)
+Bước 1: Mở Terminal 1 (server)
+    python server.py 60000
+    (Nếu bỏ 60000, server dùng mặc định trong code: DEFAULT_PORT = 55555)
+
+Bước 2: Mở Terminal 2 (client)
+    python client.py 127.0.0.1 60000
+
+Bước 3: Mở Terminal 3 (client thứ hai)
+    python client.py 127.0.0.1 60000
+
+5) CHẠY TRÊN HAI MÁY CÙNG MẠNG LAN
+- Tìm địa chỉ IP của máy chạy server (ví dụ 192.168.1.10).
+- Trên máy server:
+    python server.py 60000
+- Trên máy client:
+    python client.py 192.168.1.10 60000
+- Nếu không kết nối được:
+    • Kiểm tra firewall của máy server (mở inbound TCP port 60000).
+    • Hai máy phải cùng subnet (ping được nhau).
+
+6) LỆNH TRÊN CLIENT
+- /nick <ten>              : Đặt tên hiển thị (không khoảng trắng).
+- /list                    : Xem danh sách người đang online.
+- /pm <ten> <noi_dung>     : Gửi tin nhắn riêng cho một người dùng.
+- /quit                    : Thoát.
+- (Mặc định: gõ văn bản → gửi tin nhắn public tới tất cả).
+
+7) QUY TẮC ĐẶT TÊN
+- Không rỗng, không chứa khoảng trắng.
+- Tên trùng sẽ bị từ chối; hãy chọn tên khác.
+
+8) THÔNG BÁO TỪ SERVER
+- Khi vào/ra: Server broadcast thông báo "* <name> đã vào/thoát."
+- Khi đổi tên: Server broadcast "* old_name đổi tên thành new_name".
+
+9) GIAO THỨC TRUYỀN TIN
+- Mỗi thông điệp là một dòng kết thúc bằng '\n'.
+- Client gửi: "<text>\n" hoặc lệnh "/... \n".
+- Server tách buffer theo '\n' để lấy từng thông điệp đầy đủ.
+
+10) MÃ HÓA
+- Tất cả chuỗi encode/decode theo UTF-8 (tránh lỗi font tiếng Việt).
+
+11) XỬ LÝ LỖI THƯỜNG GẶP
+- Client báo "Mất kết nối tới server":
+    • Server đã dừng hoặc mạng bị ngắt.
+    • Sai IP/port; thử lại đúng IP/port.
+- Không đặt được /nick:
+    • Tên trống, có khoảng trắng hoặc đã có người dùng.
+- Không gõ được chữ trong client:
+    • Hãy đảm bảo đã kết nối đủ 2 client để thấy luồng chat.
+- Không vào được từ máy khác:
+    • Mở firewall TCP port 60000 trên server.
+    • Kiểm tra router/NAT, cả hai máy cùng mạng nội bộ.
+
+12) TÙY CHỈNH NHANH
+- Đổi PORT mặc định: chỉnh tham số khi chạy (python server.py <port>).
+- Đổi mã hóa: thay hằng số ENC = "utf-8" (khuyến nghị giữ nguyên).
+- Thêm lệnh mới: xử lý trong server.py → handle_client → nhánh bắt đầu '/'.
+
+13) KẾT THÚC / THOÁT
+- Client: gõ /quit hoặc Ctrl+C → client gửi '/quit' rồi đóng socket.
+- Server: nhấn Ctrl+C tại terminal server để dừng chương trình.
+
+14) GỢI Ý BẢO MẬT & PHÁT TRIỂN
+- Thêm TLS/SSL: bọc socket bằng ssl.SSLContext trên cả server và client.
+- Xác thực người dùng (token/JWT), phân quyền lệnh.
+- Chống flood: hạn chế tốc độ gửi theo client, cắt kết nối spam.
+- Ghi log: lưu file log server để kiểm tra sự cố.
+- Giao diện: có thể viết GUI (Tkinter) hoặc WebSocket (Flask/FastAPI + JS).
+
+15) KIỂM THỬ NHANH
+- Chạy 1 server + 2–3 client trên cùng máy (localhost).
+- Kiểm tra các lệnh: /nick, /list, /pm, /quit, tin nhắn public.
+- Test tiếng Việt, ký tự đặc biệt, tin nhắn dài (tự động tách dòng '\n').
+
+================================================================================
+(C) Hướng dẫn sử dụng – Nhóm thực hiện đề tài Lập trình Mạng
